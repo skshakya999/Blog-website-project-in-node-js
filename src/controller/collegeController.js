@@ -8,6 +8,8 @@ const nullValue = function(value) {
     return false
 }
 
+//=========================== Create college ===========================================================
+
 const createCollege = async function(req, res) {
     const { name, fullName, logoLink } = req.body
     try {
@@ -31,7 +33,7 @@ const createCollege = async function(req, res) {
         if (nullValue(fullName)) {
             return res.status(400).send({ status: false, message: "Invalid College full name or College full name is not mentioned." })
         }
-        if (!/^[a-zA-Z ]{3,50}$/.test(fullName)) {
+        if (!/^[a-zA-Z ,]{3,50}$/.test(fullName)) {
             return res.status(400).send({ status: false, message: "Invalid College full name" })
         }
         const duplicateFullName = await collegeModel.findOne({ fullName: fullName })
