@@ -6,6 +6,7 @@ const nullValue = function(value) {
     if (typeof value !== 'string' || value.trim().length == 0) return true
     return false
 }
+const valid = /^https?:\/\/.*\.(?:png|jpg|jpeg)/
 
 const createCollege = async function(req, res) {
     const { name, fullName, logoLink } = req.body
@@ -46,7 +47,7 @@ const createCollege = async function(req, res) {
         if (nullValue(logoLink)) {
             return res.status(400).send({ status: false, message: "Invalid College Logolink or College Logolink is not mentioned." })
         }
-        if (!validator.isURL(logoLink)) {
+        if (!valid.test(logoLink) || !validator.isURL(logoLink)) {
             return res.status(400).send({ status: false, message: "The logoLink is not valid." })
         }
         final.logoLink = logoLink

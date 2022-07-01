@@ -60,7 +60,7 @@ const createIntern = async function(req, res) {
         if (!collegeId) {
             return res.status(400).send({ status: false, message: "Enter a valid college name." })
         }
-        final.collegeId = collegeId
+        final.collegeId = collegeId._id
 
 
         let saveData = await internModel.create(final)
