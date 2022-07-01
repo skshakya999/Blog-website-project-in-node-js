@@ -16,14 +16,14 @@ const internSchema = new mongoose.Schema({
         trim: true
     },
     mobile: {
-        type: Number,
+        type: String,
         required: true,
         unique: true,
         trim: true
     },
     collegeId: {
         type: ObjectId,
-        ref: "Colleges"
+        refs: "College"
     },
     isDeleted: {
         type: Boolean,
@@ -32,6 +32,6 @@ const internSchema = new mongoose.Schema({
     deletedAt: Date
 
 
-}, { timestamp: true });
+}, { timestamps: true });
 
-module.exports = mongoose.model('Interns', internSchema);
+module.exports = mongoose.model('Intern', internSchema);

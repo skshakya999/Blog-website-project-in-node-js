@@ -1,6 +1,9 @@
 const internModel = require('../model/internModel')
 const validator = require('validator')
+
 const collegeModel = require('../model/collegeModel')
+
+
 
 const nullValue = function (value) {
 
@@ -9,9 +12,7 @@ const nullValue = function (value) {
     return false
 }
 
-//==================================== Create Interns ========================
-
-const createIntern = async function (req, res) {
+const createIntern = async function(req, res) {
     try {
         let result = {}
         const { name, email, mobile, collegeName } = req.body
@@ -26,12 +27,7 @@ const createIntern = async function (req, res) {
             return res.status(400).send({ status: false, message: "Invalid intern name or intern name is not mentioned." })
         }
         result.name = name
-        if (!/^[a-z]{3,20}$/.test(collegeName)) {
-            return res.status(400).send({ status: false, message: "College name is not valid" })
-        }
-        if (nullValue(collegeName)) {
-            return res.status(400).send({ status: false, message: "Invalid college name or college name is not mentioned." })
-        }
+
 
         if (nullValue(email)) {
             return res.status(400).send({ status: false, message: "Invalid intern email or intern email is not mentioned." })
@@ -59,47 +55,52 @@ const createIntern = async function (req, res) {
         result.mobile = mobile
 
 
-        let collegeId = await collegeModel.findOne({ name: collegeName }).select({ _id: 1 })
+        if (!/^[a-zA-Z ]{3,20}$/.test(collegeName)) {
+            return res.status(400).send({ status: false, message: "College name is not valid" })
+        }
+        if (nullValue(collegeName)) {
+            return res.status(400).send({ status: false, message: "Invalid intern name or intern name is not mentioned." })
+        }
+        let collegeId = await collegeModel.findOne( {name: collegeName }).select({ _id: 1 })
         if (!collegeId) {
             return res.status(400).send({ status: false, message: "Enter a valid college name." })
         }
-        result.collegeId = collegeId
+        
+        result.collegeId = collegeId._id
+       
         let saveData = await internModel.create(result)
-        return res.status(201).send({ status: true, data: saveData })
-    }
-    catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+        let data = {isDeleted:saveData.isDeleted,name:saveData.name,email:saveData.email,mobile:saveData.mobile,collegeId:saveData.collegeId}
+        return res.status(201).send({ status: true, data:data })
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 
 //============================ Get Interns ===========================================================================
 
-const getInterns = async function (req, res) {
-
+const getInterns = async function(req, res) {
     try {
         let collegeName = req.query.collegeName
-       
-        
 
         if (nullValue(collegeName)) {
-           return res.status(400).send({ status: false, message: 'College name is not mentioned.' })
+            return res.status(400).send({ status: false, message: 'College name is not mentioned.' })
         }
 
-        let collegeId = await collegeModel.findOne({ name: collegeName }).select({ _id: 1, name: 1, fullName: 1, logoLink: 1 })
+        let collegeId = await collegeModel.findOne({ name: collegeName.toLowerCase() }).select({ _id: 1, name: 1, fullName: 1, logoLink: 1 })
+        if (!collegeId) {
+            return res.status(404).send({ status: false, message: "No such College is available" })
+        }
 
 
         let intern = await internModel.find({ collegeId: collegeId._id }).select({ _id: 1, name: 1, email: 1, mobile: 1 })
-
-        let data = {}
-        data['name'] = collegeId.name
-        data['fullName'] = collegeId.fullName
-        data['logolink'] = collegeId.logoLink
-        data["interns"] = intern
-
+        if (intern.length == 0) {
+            return res.status(404).send({ status: false, message: "No intern have applied to this college!"  })
+        }
+        let data= {name:collegeId.name,fullName:collegeId.fullName,logoLink:collegeId.logoLink,interns:intern}
+        
         return res.status(200).send({ status: true, data })
-    }
-    catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 
