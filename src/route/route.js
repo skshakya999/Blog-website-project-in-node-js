@@ -1,5 +1,4 @@
 const express = require('express');
-const { get } = require('http');
 const route = express.Router()
 const collegeController = require('../controller/collegeController')
 const internController = require('../controller/internController')

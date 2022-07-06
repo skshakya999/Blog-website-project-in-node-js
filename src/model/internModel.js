@@ -28,8 +28,8 @@ const internSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
-    },
-    deletedAt: Date
+    }
+   
 
 
 }, { timestamps: true });

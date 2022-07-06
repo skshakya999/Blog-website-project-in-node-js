@@ -1,19 +1,19 @@
 const collegeModel = require('../model/collegeModel')
 const validator = require('validator')
 
-const nullValue = function (value) {
-
+const nullValue = function(value) {
     if (value == undefined || value == null) return true
     if (typeof value !== 'string' || value.trim().length == 0) return true
     return false
 }
+const valid = /^https?:\/\/.*\.(?:png|jpg|jpeg)/
 
 //=========================== Create college ===========================================================
 
 const createCollege = async function (req, res) {
-    const { name, fullName, logoLink } = req.body
+    res.setHeader('Access-Control-Allow-Origin','*')
     try {
-
+        const { name, fullName, logoLink } = req.body
         if (Object.keys(req.body).length == 0) {
             return res.status(400).send({ status: false, message: "Kindly enter your details." })
         }
@@ -26,7 +26,6 @@ const createCollege = async function (req, res) {
         if (!/^[a-zA-Z]{3,10}$/.test(name)) {
             return res.status(400).send({ status: false, message: "Invalid College Name" })
         }
-        // let lowerCase = name.toLowerCase()
         const duplicateName = await collegeModel.findOne({ name: name.toLowerCase() }) //findOne will give us null so null is used as false in boolean
         if (duplicateName) {
             return res.status(400).send({ status: false, message: "The college name is already there, you can directly apply for the internship." })
@@ -50,7 +49,7 @@ const createCollege = async function (req, res) {
         if (nullValue(logoLink)) {
             return res.status(400).send({ status: false, message: "Invalid College Logolink or College Logolink is not mentioned." })
         }
-        if (!validator.isURL(logoLink)) {
+        if (!valid.test(logoLink) || !validator.isURL(logoLink)) {
             return res.status(400).send({ status: false, message: "The logoLink is not valid." })
         }
         final.logoLink = logoLink
@@ -58,9 +57,9 @@ const createCollege = async function (req, res) {
 
         let saveData = await collegeModel.create(final)
 
-        let data = { name: saveData.name, fullName: saveData.fullName, logoLink: saveData.logoLink, isDeleted: saveData.isDeleted }
+        let result = { name: saveData.name, fullName: saveData.fullName, logoLink: saveData.logoLink, isDeleted: saveData.isDeleted }
 
-        return res.status(201).send({ status: true, data: data })
+        return res.status(201).send({ status: true, data: result })
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
